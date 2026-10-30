@@ -1,0 +1,12 @@
+{
+  "name": "Git checkout",
+  "summary": "Clones or updates a repository in the workspace and reports the commit.",
+  "author": "hummerstudio",
+  "license": "MIT",
+  "tags": [
+    "official-port",
+    "scm",
+    "git"
+  ],
+  "homepage": "https://github.com/hummerstudio/jenkins-atom-git-checkout"
+}

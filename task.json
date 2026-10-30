@@ -1,0 +1,96 @@
+{
+  "atomCode": "git-checkout",
+  "name": "Git checkout",
+  "version": "1.0.0",
+  "description": "Clones or updates a repository in the workspace and reports the commit.",
+  "execution": {
+    "packagePath": "git-checkout.jar",
+    "language": "java",
+    "target": "$atom_java_path -cp git-checkout.jar com.jenkinschina.atom.sdk.AtomRunner"
+  },
+  "input": {
+    "url": {
+      "label": "仓库地址",
+      "type": "vuex-input",
+      "default": ""
+    },
+    "branch": {
+      "label": "分支（留空用默认分支）",
+      "type": "vuex-input",
+      "default": ""
+    },
+    "commit": {
+      "label": "检出某个提交（优先于分支）",
+      "type": "vuex-input",
+      "default": ""
+    },
+    "targetDir": {
+      "label": "工作子目录",
+      "type": "vuex-input",
+      "default": "."
+    },
+    "depth": {
+      "label": "浅克隆深度（留空为完整克隆）",
+      "type": "vuex-input",
+      "default": ""
+    },
+    "username": {
+      "label": "用户名",
+      "type": "vuex-input",
+      "default": ""
+    },
+    "password": {
+      "label": "密码",
+      "type": "password",
+      "default": ""
+    },
+    "token": {
+      "label": "访问令牌（优先于用户名密码）",
+      "type": "password",
+      "default": ""
+    },
+    "submodules": {
+      "label": "更新子模块",
+      "type": "checkbox",
+      "default": "false"
+    },
+    "clean": {
+      "label": "检出前清理未跟踪文件",
+      "type": "checkbox",
+      "default": "false"
+    },
+    "tags": {
+      "label": "克隆时带上 tag",
+      "type": "checkbox",
+      "default": "true"
+    }
+  },
+  "output": {
+    "GIT_COMMIT": {
+      "type": "string",
+      "description": "检出的提交"
+    },
+    "GIT_BRANCH": {
+      "type": "string",
+      "description": "当前分支（分离头时为空）"
+    },
+    "GIT_URL": {
+      "type": "string",
+      "description": "远端地址"
+    },
+    "GIT_CHECKOUT_DIR": {
+      "type": "string",
+      "description": "检出目录（相对 workspace）"
+    },
+    "fileCount": {
+      "type": "string",
+      "description": "检出后工作区里的文件数"
+    }
+  },
+  "x-jenkins": {
+    "protocol": "jenkins-1",
+    "requires": {
+      "runner": ">=0.4.0"
+    }
+  }
+}
