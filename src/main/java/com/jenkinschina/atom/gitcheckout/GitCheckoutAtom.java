@@ -120,8 +120,15 @@ public class GitCheckoutAtom implements AtomTask {
                     fetch.add("--depth");
                     fetch.add(depth);
                 }
-                if (!tags) {
+                // 要导出最近标签时不能把标签关掉：--no-tags 之后 git describe 只会报
+                // "No names found, cannot describe anything"，而那个字符串会被当成标签名传下去。
+                boolean wantTags = tags || context.getBooleanParam("useMostRecentTag", false);
+                if (!wantTags) {
                     fetch.add("--no-tags");
+                } else {
+                    // `git fetch origin main`（分支简写）不会自动跟标签，只有显式 refspec 才跟——
+                    // 实测同一个仓库，加 --tags 之后 refs/tags 才出现，否则 git describe 一直说没有名字。
+                    fetch.add("--tags");
                 }
                 fetch.add("origin");
                 if (!branch.isEmpty()) {
@@ -176,12 +183,36 @@ public class GitCheckoutAtom implements AtomTask {
                         .count();
             }
 
-            return AtomResult.success()
+            AtomResult result = AtomResult.success()
                     .data("GIT_COMMIT", head)
                     .data("GIT_BRANCH", headBranch)
                     .data("GIT_URL", remotes.isEmpty() ? url : remotes)
                     .data("GIT_CHECKOUT_DIR", targetDir)
                     .data("fileCount", String.valueOf(fileCount));
+
+            if (context.getBooleanParam("useMostRecentTag", false)) {
+                // git-tag-message 的时机在这里：版本号、通知、发布备注都要在 checkout 之后立刻拿到；
+                // 放到流程末尾（push）就晚了。最近的标签按 git describe 定义，消息取附注标签正文，
+                // 轻量标签没有正文，回落到它指向的提交说明。
+                Result described = exec(target, "git", List.of("describe", "--tags", "--abbrev=0"));
+                String tagName = described.ok() ? firstLine(described.output()) : "";
+                if (tagName.isBlank()) {
+                    context.log("[git] useMostRecentTag: no tag reaches this commit");
+                } else {
+                    Result contents = exec(target, "git",
+                            List.of("for-each-ref", "--format=%(contents)", "refs/tags/" + tagName));
+                    String message = contents.ok() ? firstLine(contents.output()) : "";
+                    if (message.isBlank()) {
+                        Result subject = exec(target, "git", List.of("log", "-1", "--format=%s", tagName));
+                        message = subject.ok() ? firstLine(subject.output()) : "";
+                    }
+                    context.log("[git] most recent tag: " + tagName);
+                    result = result
+                            .data("GIT_TAG_NAME", tagName)
+                            .data("GIT_TAG_MESSAGE", message);
+                }
+            }
+            return result;
         } finally {
             if (credentialsFile != null) {
                 Files.deleteIfExists(credentialsFile);

@@ -1,7 +1,7 @@
 {
   "atomCode": "git-checkout",
   "name": "Git checkout",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Clones or updates a repository in the workspace and reports the commit.",
   "execution": {
     "packagePath": "git-checkout.jar",
@@ -63,6 +63,12 @@
       "label": "克隆时带上 tag",
       "type": "checkbox",
       "default": "true"
+    },
+    "useMostRecentTag": {
+      "label": "导出最近标签",
+      "type": "atom-checkbox",
+      "default": "",
+      "description": "把最近的标签导出为 GIT_TAG_NAME / GIT_TAG_MESSAGE（附注标签取正文，轻量标签回落到提交说明）"
     }
   },
   "output": {
@@ -85,6 +91,14 @@
     "fileCount": {
       "type": "string",
       "description": "检出后工作区里的文件数"
+    },
+    "GIT_TAG_NAME": {
+      "type": "string",
+      "description": "最近的标签名（useMostRecentTag 为 true 且存在标签时）"
+    },
+    "GIT_TAG_MESSAGE": {
+      "type": "string",
+      "description": "该标签的消息（附注正文，没有则用提交说明）"
     }
   },
   "x-jenkins": {
