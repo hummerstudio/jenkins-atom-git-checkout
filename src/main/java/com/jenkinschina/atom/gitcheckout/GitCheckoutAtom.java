@@ -302,6 +302,9 @@ public class GitCheckoutAtom implements AtomTask {
                 }
             }
             return new Result(process.waitFor(), output.toString());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return new Result(-1, String.valueOf(e));
         } catch (Exception e) {
             return new Result(-1, String.valueOf(e));
         }
